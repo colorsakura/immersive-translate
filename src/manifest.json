@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Firefox Selection Translator",
+  "version": "0.1.0",
+  "description": "Translate selected text in a small bubble.",
+  "applications": {
+    "gecko": {
+      "id": "selection-translator@example.local"
+    }
+  },
+  "permissions": [
+    "storage",
+    "https://translation.googleapis.com/*",
+    "https://openapi.youdao.com/*"
+  ],
+  "background": {
+    "scripts": ["src/background/index.ts"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/index.ts"]
+    }
+  ],
+  "options_ui": {
+    "page": "src/options/index.html",
+    "open_in_tab": true
+  }
+}
