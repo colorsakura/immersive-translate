@@ -1,16 +1,23 @@
 import browser from 'webextension-polyfill';
 import type { ExtensionSettings, TranslatorName } from './types';
 
-const SUPPORTED_TRANSLATORS: TranslatorName[] = ['google', 'youdao'];
+const SUPPORTED_TRANSLATORS: TranslatorName[] = ['google', 'youdao', 'openai'];
 const STORAGE_KEY = 'settings';
 
 export const DEFAULT_SETTINGS: ExtensionSettings = {
   sourceLang: 'auto',
   targetLang: 'zh',
-  fallbackChain: ['google', 'youdao'],
+  fallbackChain: ['google', 'youdao', 'openai'],
   sources: {
     google: { apiKey: '' },
     youdao: { appKey: '', appSecret: '' },
+    openai: {
+      apiKey: '',
+      baseUrl: 'https://api.openai.com/v1',
+      model: 'gpt-4o-mini',
+      systemPrompt:
+        'You are a professional translation engine. Translate the user text into the target language. Preserve meaning, tone, formatting, line breaks, and terminology. Return only the translated text.',
+    },
   },
 };
 
@@ -51,6 +58,10 @@ function mergeWithDefaults(value: Partial<ExtensionSettings> | undefined): Exten
       youdao: {
         ...DEFAULT_SETTINGS.sources.youdao,
         ...value?.sources?.youdao,
+      },
+      openai: {
+        ...DEFAULT_SETTINGS.sources.openai,
+        ...value?.sources?.openai,
       },
     },
   };
@@ -93,6 +104,10 @@ export async function mergeSettings(
       youdao: {
         ...current.sources.youdao,
         ...partial.sources?.youdao,
+      },
+      openai: {
+        ...current.sources.openai,
+        ...partial.sources?.openai,
       },
     },
   });

@@ -1,6 +1,7 @@
 import type { ExtensionSettings, TranslationResult, TranslatorName } from '../../shared/types';
 import { googleTranslator } from './google';
-import { mapGoogleLang, mapYoudaoLang } from './languages';
+import { mapGoogleLang, mapOpenAILang, mapYoudaoLang } from './languages';
+import { openaiTranslator } from './openai';
 import type { SourceConfig, TranslationSource } from './types';
 import { TranslationError } from './types';
 import { youdaoTranslator } from './youdao';
@@ -8,6 +9,7 @@ import { youdaoTranslator } from './youdao';
 const SOURCES: Record<TranslatorName, TranslationSource> = {
   google: googleTranslator,
   youdao: youdaoTranslator,
+  openai: openaiTranslator,
 };
 
 function mapLanguages(
@@ -19,6 +21,12 @@ function mapLanguages(
     return {
       source: mapGoogleLang(sourceLang) || '',
       target: mapGoogleLang(targetLang) || targetLang,
+    };
+  }
+  if (sourceName === 'openai') {
+    return {
+      source: mapOpenAILang(sourceLang),
+      target: mapOpenAILang(targetLang),
     };
   }
   return {

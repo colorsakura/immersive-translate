@@ -11,7 +11,8 @@
   "permissions": [
     "storage",
     "https://translation.googleapis.com/*",
-    "https://openapi.youdao.com/*"
+    "https://openapi.youdao.com/*",
+    "<all_urls>"
   ],
   "background": {
     "scripts": ["src/background/index.ts"]

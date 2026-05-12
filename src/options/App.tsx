@@ -16,11 +16,13 @@ const LANGUAGES = [
 const TRANSLATOR_LABELS: Record<TranslatorName, string> = {
   google: 'Google Translate',
   youdao: '有道翻译',
+  openai: 'OpenAI 兼容大模型',
 };
 
 const TRANSLATOR_DESCRIPTIONS: Record<TranslatorName, string> = {
   google: '适合通用文本翻译，需要 Google Cloud Translation API Key。',
   youdao: '适合中英互译场景，需要有道智云 appKey 和 appSecret。',
+  openai: '通过 openai-sdk 调用 OpenAI 或兼容提供商，支持自定义系统提示词。',
 };
 
 function moveItem(items: TranslatorName[], index: number, direction: -1 | 1): TranslatorName[] {
@@ -207,6 +209,46 @@ export function App() {
                     placeholder="输入有道 appSecret"
                     onChange={(appSecret) => updateSource('youdao', { appSecret })}
                   />
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <h3 className="mb-4 text-sm font-semibold text-slate-900">OpenAI 兼容大模型</h3>
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <TextInput
+                      label="API Key"
+                      type={showSecrets ? 'text' : 'password'}
+                      value={settings.sources.openai.apiKey}
+                      placeholder="sk-..."
+                      onChange={(apiKey) => updateSource('openai', { apiKey })}
+                    />
+                    <TextInput
+                      label="模型"
+                      value={settings.sources.openai.model}
+                      placeholder="gpt-4o-mini"
+                      onChange={(model) => updateSource('openai', { model })}
+                    />
+                  </div>
+                  <div className="mt-5">
+                    <TextInput
+                      label="Base URL（可填写兼容 OpenAI 的提供商地址）"
+                      value={settings.sources.openai.baseUrl}
+                      placeholder="https://api.openai.com/v1"
+                      onChange={(baseUrl) => updateSource('openai', { baseUrl })}
+                    />
+                  </div>
+                  <label className="mt-5 block">
+                    <span className="mb-2 block text-sm font-medium text-slate-700">
+                      系统提示词
+                    </span>
+                    <textarea
+                      value={settings.sources.openai.systemPrompt}
+                      placeholder="输入系统提示词"
+                      onChange={(event) =>
+                        updateSource('openai', { systemPrompt: event.target.value })
+                      }
+                      rows={5}
+                      className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    />
+                  </label>
                 </div>
               </div>
             </section>

@@ -1,4 +1,4 @@
-export type TranslatorName = 'google' | 'youdao';
+export type TranslatorName = 'google' | 'youdao' | 'openai';
 
 export interface SourceConfigMap {
   google: {
@@ -7,6 +7,12 @@ export interface SourceConfigMap {
   youdao: {
     appKey: string;
     appSecret: string;
+  };
+  openai: {
+    apiKey: string;
+    baseUrl: string;
+    model: string;
+    systemPrompt: string;
   };
 }
 
