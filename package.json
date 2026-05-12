@@ -6,6 +6,7 @@
     "dev": "vite --mode development",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types src/**/*.test.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

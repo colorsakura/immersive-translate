@@ -1,6 +1,8 @@
 import browser from 'webextension-polyfill';
 import type { TranslateResponse } from '../shared/messages';
+import { getSettings } from '../shared/storage';
 import { destroyBubble, renderBubble, type DOMRectLike } from './bubble';
+import { isTextTargetLanguage } from './language';
 import { isInsideBubble } from './bubble/shadow';
 
 const MAX_TEXT_LENGTH = 5000;
@@ -46,6 +48,11 @@ function cleanupBubble(): void {
   lastText = '';
   bubbleVisible = false;
   destroyBubble();
+}
+
+async function isTargetLanguage(text: string): Promise<boolean> {
+  const settings = await getSettings();
+  return isTextTargetLanguage(text, settings.targetLang, browser.i18n.detectLanguage);
 }
 
 function showTranslateIcon(text: string, rect: DOMRectLike): void {
@@ -100,7 +107,7 @@ async function requestTranslation(text: string, rect: DOMRectLike): Promise<void
   }
 }
 
-function handleSelection(): void {
+async function handleSelection(): Promise<void> {
   const selection = window.getSelection();
   if (!selection || selection.isCollapsed) {
     return;
@@ -120,13 +127,20 @@ function handleSelection(): void {
     return;
   }
 
+  if (await isTargetLanguage(text)) {
+    cleanupBubble();
+    return;
+  }
+
   lastText = text;
   showTranslateIcon(text, rect);
 }
 
 function scheduleSelectionHandling(): void {
   window.clearTimeout(debounceTimer);
-  debounceTimer = window.setTimeout(handleSelection, SELECTION_DEBOUNCE_MS);
+  debounceTimer = window.setTimeout(() => {
+    void handleSelection();
+  }, SELECTION_DEBOUNCE_MS);
 }
 
 function patchHistoryCleanup(): void {
