@@ -22,7 +22,10 @@ function normalizeFallbackChain(chain: unknown, allowDefault: boolean): Translat
   const seen = new Set<TranslatorName>();
   const normalized: TranslatorName[] = [];
   for (const item of chain) {
-    if (SUPPORTED_TRANSLATORS.includes(item as TranslatorName) && !seen.has(item as TranslatorName)) {
+    if (
+      SUPPORTED_TRANSLATORS.includes(item as TranslatorName) &&
+      !seen.has(item as TranslatorName)
+    ) {
       seen.add(item as TranslatorName);
       normalized.push(item as TranslatorName);
     }
@@ -75,7 +78,9 @@ export async function saveSettings(settings: ExtensionSettings): Promise<void> {
   await browser.storage.sync.set({ [STORAGE_KEY]: normalized });
 }
 
-export async function mergeSettings(partial: Partial<ExtensionSettings>): Promise<ExtensionSettings> {
+export async function mergeSettings(
+  partial: Partial<ExtensionSettings>,
+): Promise<ExtensionSettings> {
   const current = await getSettings();
   const merged = mergeWithDefaults({
     ...current,

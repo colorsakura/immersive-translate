@@ -10,7 +10,11 @@ const SOURCES: Record<TranslatorName, TranslationSource> = {
   youdao: youdaoTranslator,
 };
 
-function mapLanguages(sourceName: TranslatorName, sourceLang: string, targetLang: string): { source: string; target: string } {
+function mapLanguages(
+  sourceName: TranslatorName,
+  sourceLang: string,
+  targetLang: string,
+): { source: string; target: string } {
   if (sourceName === 'google') {
     return {
       source: mapGoogleLang(sourceLang) || '',
@@ -27,7 +31,10 @@ function getSourceConfig(settings: ExtensionSettings, sourceName: TranslatorName
   return settings.sources[sourceName];
 }
 
-export async function translateWithFallback(text: string, settings: ExtensionSettings): Promise<TranslationResult> {
+export async function translateWithFallback(
+  text: string,
+  settings: ExtensionSettings,
+): Promise<TranslationResult> {
   for (const sourceName of settings.fallbackChain) {
     const source = SOURCES[sourceName];
     if (!source) {
@@ -36,7 +43,12 @@ export async function translateWithFallback(text: string, settings: ExtensionSet
 
     try {
       const languages = mapLanguages(sourceName, settings.sourceLang, settings.targetLang);
-      return await source.translate(text, languages.source, languages.target, getSourceConfig(settings, sourceName));
+      return await source.translate(
+        text,
+        languages.source,
+        languages.target,
+        getSourceConfig(settings, sourceName),
+      );
     } catch (error) {
       console.warn('[translator] source failed', sourceName, error);
     }

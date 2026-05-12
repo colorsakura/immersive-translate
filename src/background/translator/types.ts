@@ -6,7 +6,12 @@ export interface SourceConfig {
 
 export interface TranslationSource {
   name: TranslatorName;
-  translate(text: string, source: string, target: string, config: SourceConfig): Promise<TranslationResult>;
+  translate(
+    text: string,
+    source: string,
+    target: string,
+    config: SourceConfig,
+  ): Promise<TranslationResult>;
 }
 
 export class TranslationError extends Error {

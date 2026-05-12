@@ -20,7 +20,10 @@ function estimatePosition(rect: DOMRectLike): { left: number; top: number } {
     VIEWPORT_PADDING,
     Math.max(VIEWPORT_PADDING, window.innerWidth - ESTIMATED_WIDTH - VIEWPORT_PADDING),
   );
-  return { left, top: clamp(rect.bottom + 8, VIEWPORT_PADDING, window.innerHeight - VIEWPORT_PADDING) };
+  return {
+    left,
+    top: clamp(rect.bottom + 8, VIEWPORT_PADDING, window.innerHeight - VIEWPORT_PADDING),
+  };
 }
 
 export function Bubble({ rect, children, compact = false }: BubbleProps) {
@@ -42,8 +45,16 @@ export function Bubble({ rect, children, compact = false }: BubbleProps) {
     const left = rect.left + rect.width / 2 - width / 2;
 
     setPosition({
-      left: clamp(left, VIEWPORT_PADDING, Math.max(VIEWPORT_PADDING, window.innerWidth - width - VIEWPORT_PADDING)),
-      top: clamp(top, VIEWPORT_PADDING, Math.max(VIEWPORT_PADDING, window.innerHeight - height - VIEWPORT_PADDING)),
+      left: clamp(
+        left,
+        VIEWPORT_PADDING,
+        Math.max(VIEWPORT_PADDING, window.innerWidth - width - VIEWPORT_PADDING),
+      ),
+      top: clamp(
+        top,
+        VIEWPORT_PADDING,
+        Math.max(VIEWPORT_PADDING, window.innerHeight - height - VIEWPORT_PADDING),
+      ),
     });
   }, [rect]);
 

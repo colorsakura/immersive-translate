@@ -68,7 +68,10 @@ async function requestTranslation(text: string, rect: DOMRectLike): Promise<void
   renderBubble({ status: 'loading', rect });
 
   try {
-    const response = (await browser.runtime.sendMessage({ type: 'translate', text })) as TranslateResponse;
+    const response = (await browser.runtime.sendMessage({
+      type: 'translate',
+      text,
+    })) as TranslateResponse;
     if (requestId !== currentRequestId) {
       return;
     }

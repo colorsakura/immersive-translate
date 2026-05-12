@@ -38,7 +38,12 @@ function mapYoudaoError(errorCode: string | undefined): TranslationError | undef
 
 export const youdaoTranslator: TranslationSource = {
   name: 'youdao',
-  async translate(text: string, source: string, target: string, config: SourceConfig): Promise<TranslationResult> {
+  async translate(
+    text: string,
+    source: string,
+    target: string,
+    config: SourceConfig,
+  ): Promise<TranslationResult> {
     if (!config.appKey || !config.appSecret) {
       throw new TranslationError('有道配置未完成', 'MISSING_CONFIG');
     }
@@ -46,7 +51,9 @@ export const youdaoTranslator: TranslationSource = {
     return retryOnceOnRateLimit(async () => {
       const salt = String(Date.now());
       const curtime = String(Math.floor(Date.now() / 1000));
-      const sign = await sha256Hex(`${config.appKey}${truncateForYoudaoSign(text)}${salt}${curtime}${config.appSecret}`);
+      const sign = await sha256Hex(
+        `${config.appKey}${truncateForYoudaoSign(text)}${salt}${curtime}${config.appSecret}`,
+      );
       const params = new URLSearchParams({
         q: text,
         from: source,

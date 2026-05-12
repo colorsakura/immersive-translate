@@ -10,25 +10,31 @@ function normalizeText(text: string): string {
 }
 
 function isRuntimeMessage(message: unknown): message is RuntimeMessage {
-  return typeof message === 'object' && message !== null && (message as { type?: unknown }).type === 'translate';
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    (message as { type?: unknown }).type === 'translate'
+  );
 }
 
-browser.runtime.onMessage.addListener(async (message: unknown): Promise<TranslateResponse | undefined> => {
-  if (!isRuntimeMessage(message)) {
-    return undefined;
-  }
+browser.runtime.onMessage.addListener(
+  async (message: unknown): Promise<TranslateResponse | undefined> => {
+    if (!isRuntimeMessage(message)) {
+      return undefined;
+    }
 
-  const text = normalizeText(message.text);
-  if (!text) {
-    return { ok: false, error: '未选中内容' };
-  }
+    const text = normalizeText(message.text);
+    if (!text) {
+      return { ok: false, error: '未选中内容' };
+    }
 
-  try {
-    const settings = await getSettings();
-    const result = await translateWithFallback(text, settings);
-    return { ok: true, result };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : '翻译失败，请检查 API Key';
-    return { ok: false, error: message || '翻译失败，请检查 API Key' };
-  }
-});
+    try {
+      const settings = await getSettings();
+      const result = await translateWithFallback(text, settings);
+      return { ok: true, result };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '翻译失败，请检查 API Key';
+      return { ok: false, error: message || '翻译失败，请检查 API Key' };
+    }
+  },
+);
