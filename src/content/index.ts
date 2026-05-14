@@ -107,9 +107,13 @@ async function requestTranslation(text: string, rect: DOMRectLike): Promise<void
   }
 }
 
+function isBubbleSelection(selection: Selection): boolean {
+  return isInsideBubble(selection.anchorNode) || isInsideBubble(selection.focusNode);
+}
+
 async function handleSelection(): Promise<void> {
   const selection = window.getSelection();
-  if (!selection || selection.isCollapsed) {
+  if (!selection || selection.isCollapsed || isBubbleSelection(selection)) {
     return;
   }
 
@@ -136,7 +140,11 @@ async function handleSelection(): Promise<void> {
   showTranslateIcon(text, rect);
 }
 
-function scheduleSelectionHandling(): void {
+function scheduleSelectionHandling(event: MouseEvent): void {
+  if (isInsideBubble(event.target)) {
+    return;
+  }
+
   window.clearTimeout(debounceTimer);
   debounceTimer = window.setTimeout(() => {
     void handleSelection();
