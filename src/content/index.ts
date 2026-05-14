@@ -6,7 +6,7 @@ import { isTextTargetLanguage } from './language';
 import { isInsideBubble } from './bubble/shadow';
 
 const MAX_TEXT_LENGTH = 5000;
-const SELECTION_DEBOUNCE_MS = 150;
+const SELECTION_DEBOUNCE_MS = 350;
 
 let debounceTimer: number | undefined;
 let currentRequestId = 0;
