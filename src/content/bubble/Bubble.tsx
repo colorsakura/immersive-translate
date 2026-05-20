@@ -1,10 +1,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Header } from './Header';
 import type { DOMRectLike } from './index';
 
 interface BubbleProps {
   rect: DOMRectLike;
   children: React.ReactNode;
   compact?: boolean;
+  isPinned: boolean;
+  onPin: () => void;
+  onClose: () => void;
 }
 
 const VIEWPORT_PADDING = 8;
@@ -26,7 +30,7 @@ function estimatePosition(rect: DOMRectLike): { left: number; top: number } {
   };
 }
 
-export function Bubble({ rect, children, compact = false }: BubbleProps) {
+export function Bubble({ rect, children, compact = false, isPinned, onPin, onClose }: BubbleProps) {
   const bubbleRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{
     offsetX: number;
@@ -41,6 +45,9 @@ export function Bubble({ rect, children, compact = false }: BubbleProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   useLayoutEffect(() => {
+    if (isPinned) {
+      return;
+    }
     const element = bubbleRef.current;
     if (!element) {
       return;
@@ -66,7 +73,7 @@ export function Bubble({ rect, children, compact = false }: BubbleProps) {
         Math.max(VIEWPORT_PADDING, window.innerHeight - height - VIEWPORT_PADDING),
       ),
     });
-  }, [rect]);
+  }, [rect, isPinned]);
 
   useEffect(() => {
     if (!isDragging) {
@@ -153,11 +160,15 @@ export function Bubble({ rect, children, compact = false }: BubbleProps) {
         position: 'fixed',
         left: `${position.left}px`,
         top: `${position.top}px`,
-        maxWidth: compact ? 'none' : '360px',
-        padding: compact ? '4px' : '8px 10px',
+        zIndex: '2147483647',
+        display: 'flex',
+        flexDirection: 'column',
+        width: compact ? 'auto' : '360px',
+        maxWidth: '360px',
+        padding: compact ? '4px' : '0',
         borderRadius: compact ? '999px' : '8px',
-        background: 'rgba(24, 24, 27, 0.96)',
-        color: '#fff',
+        background: compact ? 'rgba(24, 24, 27, 0.96)' : '#fff',
+        color: compact ? '#fff' : '#18181b',
         fontSize: '14px',
         lineHeight: 1.5,
         boxShadow: '0 8px 24px rgba(0,0,0,.24)',
@@ -167,18 +178,15 @@ export function Bubble({ rect, children, compact = false }: BubbleProps) {
       }}
     >
       {!compact && (
-        <div
-          aria-hidden="true"
-          onMouseDown={handleMouseDown}
-          style={{
-            height: '10px',
-            margin: '-2px -4px 4px',
-            cursor: isDragging ? 'grabbing' : 'grab',
-            userSelect: 'none',
-          }}
+        <Header
+          isPinned={isPinned}
+          onPin={onPin}
+          onClose={onClose}
+          onDragStart={handleMouseDown}
+          isDragging={isDragging}
         />
       )}
-      {children}
+      <div style={{ padding: compact ? '0' : '8px 10px' }}>{children}</div>
     </div>
   );
 }

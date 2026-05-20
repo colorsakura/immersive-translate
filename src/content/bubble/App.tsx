@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { BubbleState } from './index';
 import { Bubble } from './Bubble';
 
@@ -6,15 +7,33 @@ interface AppProps {
 }
 
 export function App({ state }: AppProps) {
+  const [isPinned, setIsPinned] = useState(false);
+
+  const handlePin = () => {
+    const newIsPinned = !isPinned;
+    setIsPinned(newIsPinned);
+    if (state.status !== 'icon') {
+      state.onPin?.(newIsPinned);
+    }
+  };
+
+  const handleClose = () => {
+    if (state.status !== 'icon') {
+      state.onClose?.();
+    }
+  };
+
   if (state.status === 'icon') {
     return (
-      <Bubble rect={state.rect} compact>
+      <Bubble rect={state.rect} compact isPinned={false} onPin={() => {}} onClose={() => {}}>
         <button
           type="button"
           onClick={state.onClick}
           title="翻译"
           style={{
-            display: 'block',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             width: '28px',
             height: '28px',
             padding: 0,
@@ -24,7 +43,6 @@ export function App({ state }: AppProps) {
             color: '#fff',
             cursor: 'pointer',
             fontSize: '16px',
-            lineHeight: '28px',
           }}
         >
           译
@@ -33,13 +51,11 @@ export function App({ state }: AppProps) {
     );
   }
 
-  if (state.status === 'loading') {
-    return <Bubble rect={state.rect}>翻译中...</Bubble>;
-  }
-
-  if (state.status === 'error') {
-    return <Bubble rect={state.rect}>{state.message}</Bubble>;
-  }
-
-  return <Bubble rect={state.rect}>{state.text}</Bubble>;
+  return (
+    <Bubble rect={state.rect} isPinned={isPinned} onPin={handlePin} onClose={handleClose}>
+      {state.status === 'loading' && '翻译中...'}
+      {state.status === 'error' && state.message}
+      {state.status === 'result' && state.text}
+    </Bubble>
+  );
 }

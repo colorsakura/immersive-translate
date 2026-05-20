@@ -12,6 +12,14 @@ let debounceTimer: number | undefined;
 let currentRequestId = 0;
 let lastText = '';
 let bubbleVisible = false;
+let isBubblePinned = false;
+
+function handleOutsideClick(event: MouseEvent) {
+  if (isBubblePinned || isInsideBubble(event.target)) {
+    return;
+  }
+  cleanupBubble();
+}
 
 function toRectLike(rect: DOMRect): DOMRectLike {
   return {
@@ -44,10 +52,14 @@ function getSelectionRect(selection: Selection): DOMRectLike | null {
 }
 
 function cleanupBubble(): void {
+  if (isBubblePinned) {
+    return;
+  }
   currentRequestId += 1;
   lastText = '';
   bubbleVisible = false;
   destroyBubble();
+  document.removeEventListener('click', handleOutsideClick, true);
 }
 
 async function isTargetLanguage(text: string): Promise<boolean> {
@@ -58,6 +70,7 @@ async function isTargetLanguage(text: string): Promise<boolean> {
 function showTranslateIcon(text: string, rect: DOMRectLike): void {
   const iconRequestId = ++currentRequestId;
   bubbleVisible = true;
+  document.addEventListener('click', handleOutsideClick, true);
   renderBubble({
     status: 'icon',
     rect,
@@ -72,7 +85,15 @@ function showTranslateIcon(text: string, rect: DOMRectLike): void {
 async function requestTranslation(text: string, rect: DOMRectLike): Promise<void> {
   const requestId = ++currentRequestId;
   bubbleVisible = true;
-  renderBubble({ status: 'loading', rect });
+  const onPin = (isPinned: boolean) => {
+    isBubblePinned = isPinned;
+  };
+  const onClose = () => {
+    isBubblePinned = false;
+    cleanupBubble();
+  };
+
+  renderBubble({ status: 'loading', rect, onPin, onClose });
 
   try {
     const response = (await browser.runtime.sendMessage({
@@ -84,11 +105,11 @@ async function requestTranslation(text: string, rect: DOMRectLike): Promise<void
     }
 
     if (response.ok) {
-      renderBubble({ status: 'result', rect, text: response.result.text });
+      renderBubble({ status: 'result', rect, text: response.result.text, onPin, onClose });
       return;
     }
 
-    renderBubble({ status: 'error', rect, message: response.error });
+    renderBubble({ status: 'error', rect, message: response.error, onPin, onClose });
     window.setTimeout(() => {
       if (requestId === currentRequestId) {
         cleanupBubble();
@@ -98,7 +119,7 @@ async function requestTranslation(text: string, rect: DOMRectLike): Promise<void
     if (requestId !== currentRequestId) {
       return;
     }
-    renderBubble({ status: 'error', rect, message: '翻译失败，请稍后重试' });
+    renderBubble({ status: 'error', rect, message: '翻译失败，请稍后重试', onPin, onClose });
     window.setTimeout(() => {
       if (requestId === currentRequestId) {
         cleanupBubble();
@@ -183,6 +204,7 @@ document.addEventListener('mousedown', (event) => {
 });
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
+    isBubblePinned = false;
     cleanupBubble();
   }
 });

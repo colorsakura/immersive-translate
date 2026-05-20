@@ -13,9 +13,26 @@ export interface DOMRectLike {
 
 export type BubbleState =
   | { status: 'icon'; rect: DOMRectLike; onClick: () => void }
-  | { status: 'loading'; rect: DOMRectLike }
-  | { status: 'result'; rect: DOMRectLike; text: string }
-  | { status: 'error'; rect: DOMRectLike; message: string };
+  | {
+      status: 'loading';
+      rect: DOMRectLike;
+      onPin?: (isPinned: boolean) => void;
+      onClose?: () => void;
+    }
+  | {
+      status: 'result';
+      rect: DOMRectLike;
+      text: string;
+      onPin?: (isPinned: boolean) => void;
+      onClose?: () => void;
+    }
+  | {
+      status: 'error';
+      rect: DOMRectLike;
+      message: string;
+      onPin?: (isPinned: boolean) => void;
+      onClose?: () => void;
+    };
 
 let root: Root | null = null;
 let container: HTMLDivElement | null = null;
