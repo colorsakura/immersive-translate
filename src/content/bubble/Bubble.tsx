@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { DOMRectLike } from './index';
 
 interface BubbleProps {
@@ -28,7 +28,17 @@ function estimatePosition(rect: DOMRectLike): { left: number; top: number } {
 
 export function Bubble({ rect, children, compact = false }: BubbleProps) {
   const bubbleRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{
+    offsetX: number;
+    offsetY: number;
+    startX: number;
+    startY: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const wasDraggedRef = useRef(false);
   const [position, setPosition] = useState(() => estimatePosition(rect));
+  const [isDragging, setIsDragging] = useState(false);
 
   useLayoutEffect(() => {
     const element = bubbleRef.current;
@@ -58,9 +68,87 @@ export function Bubble({ rect, children, compact = false }: BubbleProps) {
     });
   }, [rect]);
 
+  useEffect(() => {
+    if (!isDragging) {
+      return;
+    }
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const drag = dragRef.current;
+      if (!drag) {
+        return;
+      }
+
+      if (Math.abs(event.clientX - drag.startX) > 3 || Math.abs(event.clientY - drag.startY) > 3) {
+        wasDraggedRef.current = true;
+      }
+
+      setPosition({
+        left: clamp(
+          event.clientX - drag.offsetX,
+          VIEWPORT_PADDING,
+          Math.max(VIEWPORT_PADDING, window.innerWidth - drag.width - VIEWPORT_PADDING),
+        ),
+        top: clamp(
+          event.clientY - drag.offsetY,
+          VIEWPORT_PADDING,
+          Math.max(VIEWPORT_PADDING, window.innerHeight - drag.height - VIEWPORT_PADDING),
+        ),
+      });
+    };
+
+    const handleMouseUp = () => {
+      dragRef.current = null;
+      setIsDragging(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
+  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    const element = bubbleRef.current;
+    if (!element) {
+      return;
+    }
+
+    const elementRect = element.getBoundingClientRect();
+    dragRef.current = {
+      offsetX: event.clientX - elementRect.left,
+      offsetY: event.clientY - elementRect.top,
+      startX: event.clientX,
+      startY: event.clientY,
+      width: elementRect.width,
+      height: elementRect.height,
+    };
+    wasDraggedRef.current = false;
+    setIsDragging(true);
+    event.preventDefault();
+  };
+
+  const handleClickCapture = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!wasDraggedRef.current) {
+      return;
+    }
+
+    wasDraggedRef.current = false;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
   return (
     <div
       ref={bubbleRef}
+      onClickCapture={handleClickCapture}
       style={{
         position: 'fixed',
         left: `${position.left}px`,
@@ -78,6 +166,18 @@ export function Bubble({ rect, children, compact = false }: BubbleProps) {
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
+      {!compact && (
+        <div
+          aria-hidden="true"
+          onMouseDown={handleMouseDown}
+          style={{
+            height: '10px',
+            margin: '-2px -4px 4px',
+            cursor: isDragging ? 'grabbing' : 'grab',
+            userSelect: 'none',
+          }}
+        />
+      )}
       {children}
     </div>
   );
