@@ -38,3 +38,7 @@ browser.runtime.onMessage.addListener(
     }
   },
 );
+
+browser.browserAction.onClicked.addListener(() => {
+  browser.runtime.openOptionsPage();
+});
