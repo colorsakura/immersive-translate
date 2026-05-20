@@ -159,8 +159,7 @@ export function App() {
             </p>
             <h1 className="text-3xl font-bold tracking-tight">划词翻译设置</h1>
             <p className="mt-3 text-sm leading-6 text-blue-50">
-              配置翻译服务、语言偏好和回退顺序。API Key 只会保存在扩展 storage 中，由 Background
-              脚本读取使用。
+              配置翻译服务、语言偏好和回退顺序。
             </p>
           </div>
         </header>
