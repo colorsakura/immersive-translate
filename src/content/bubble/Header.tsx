@@ -1,4 +1,4 @@
-import { Pin, Close } from './icons';
+import { Pin, X } from 'lucide-react';
 
 interface HeaderProps {
   isPinned: boolean;
@@ -66,7 +66,7 @@ export function Header({ isPinned, onPin, onClose, onDragStart, isDragging }: He
             cursor: 'pointer',
           }}
         >
-          <Close style={{ width: '16px', height: '16px' }} />
+          <X style={{ width: '16px', height: '16px' }} />
         </button>
       </div>
     </div>
